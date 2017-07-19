@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "405489029210",
+    "firebase_url": "https://retaurant-reservations.firebaseio.com",
+    "project_id": "retaurant-reservations",
+    "storage_bucket": "retaurant-reservations.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405489029210:android:be1c59eba9a0e3fa",
+        "android_client_info": {
+          "package_name": "com.waitr.thelazydev.tabletop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "405489029210-lc051o3u0hk6qc95q7emien2gmi6h99l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCtnjgW4VBf7APujDcvHiV0vwXxnbkC3g"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
