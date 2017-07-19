@@ -175,9 +175,9 @@ public class FirebaseManager {
     }
 
 
-    public void findActiveOrder(String userId, final FindActiveOrderCompletionHandler handler) {
+    public void monitor(String userId, final FindActiveOrderCompletionHandler handler) {
         String baseUrl = getFirebaseBaseUrl();
-        final String fullUrl = baseUrl + "lookups/users_to_orders/" + userId;
+        final String fullUrl = baseUrl;
         final DatabaseReference userActiveOrder = FirebaseDatabase.getInstance().getReferenceFromUrl(fullUrl);
 
         Log.e("fullUrl", fullUrl);
@@ -237,6 +237,6 @@ public class FirebaseManager {
     }
 
     public String getFirebaseBaseUrl() {
-        return "https://retaurant-reservations.firebaseio.com/lookups/code_to_table";
+        return "https://retaurant-reservations.firebaseio.com/";
     }
 }

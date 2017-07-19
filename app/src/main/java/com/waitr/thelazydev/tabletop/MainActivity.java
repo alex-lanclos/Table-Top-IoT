@@ -25,6 +25,12 @@ import com.google.android.things.pio.Gpio;
 import com.google.android.things.pio.GpioCallback;
 import com.google.android.things.pio.PeripheralManagerService;
 import com.google.android.things.pio.Pwm;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -57,7 +63,7 @@ public class MainActivity extends Activity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     // Default LED brightness
-    private static final int LEDSTRIP_BRIGHTNESS = 1;
+    private static final int LEDSTRIP_BRIGHTNESS = 0;
     // Brightness values
     private static final int BRIGHTNESS_START = 1;
     private static final int BRIGHTNESS_END = 5;
@@ -143,13 +149,13 @@ public class MainActivity extends Activity {
                 mLEDBrightnessCycleHandler.postDelayed(mLEDBrightnessCycleRunnable, 100);
             }
         };
+
+        monitorFirebase();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
-        tableIsReady();
     }
 
     @Override
@@ -195,7 +201,7 @@ public class MainActivity extends Activity {
     private void tableIsReserved() {
         // Initialize LED strip
         try {
-            mLedstrip.setBrightness(LEDSTRIP_BRIGHTNESS);
+            mLedstrip.setBrightness(1);
             int[] colors = new int[7];
             Arrays.fill(colors, Color.RED);
             mLedstrip.write(colors);
@@ -220,6 +226,75 @@ public class MainActivity extends Activity {
         } catch (IOException e) {
             throw new RuntimeException("Error initializing LED strip", e);
         }
+
+        mLEDBrightnessCycleHandler.removeCallbacksAndMessages(null);
+    }
+
+
+    public void monitorFirebase() {
+        String baseUrl = FirebaseManager.getSharedManager(this).getFirebaseBaseUrl();
+        final String fullUrl = baseUrl;
+        final DatabaseReference userActiveOrder = FirebaseDatabase.getInstance().getReferenceFromUrl(fullUrl);
+
+        Log.e("fullUrl", fullUrl);
+
+        FirebaseManager.getSharedManager(this).authenticate(userActiveOrder, new FirebaseManager.AuthCompletionHandler() {
+            @Override
+            public void onAuthSuccess(FirebaseAuth authData) {
+                userActiveOrder.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.v(TAG, "User Active Order:\n" + dataSnapshot.getValue());
+                        if (dataSnapshot.getValue() != null) {
+                            FirebaseTableTop tableTop = dataSnapshot.getValue(FirebaseTableTop.class);
+                            if (tableTop != null) {
+
+
+                                switch (tableTop.getTable_state()) {
+                                    case 0:
+                                    case 3:
+                                        occupyTable();
+                                        break;
+                                    case 1:
+                                        tableIsReserved();
+                                        break;
+                                    case 2:
+                                        tableIsReady();
+                                        break;
+                                    default:
+                                        occupyTable();
+                                        break;
+
+                                }
+
+//                                if (tableTop.getIs_occupied()) {
+//                                    occupyTable();
+//                                } else if (tableTop.getIs_ready()) {
+//                                    tableIsReady();
+//                                } else if (tableTop.getIs_reserved()) {
+//                                    tableIsReserved();
+//                                } else {
+//                                    occupyTable();
+//                                }
+                            }
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError firebaseError) {
+                        Log.e(TAG, firebaseError.getMessage());
+
+                    }
+                });
+            }
+
+            @Override
+            public void onAuthFailure(Exception error) {
+                Log.e(TAG, error.getMessage());
+
+            }
+        }, true);
     }
 
 
